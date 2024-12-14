@@ -1,13 +1,20 @@
 # Copyright 2021-present, Trail of Bits, Inc. All rights reserved.
 
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.30)
 
-# Fix behavior of CMAKE_CXX_STANDARD when targeting macOS.
 if (POLICY CMP0025)
   cmake_policy(SET CMP0025 NEW)
 endif ()
 
+if (POLICY CMP0116)
+  cmake_policy(SET CMP0116 NEW)
+endif ()
+
+set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "0e5b6991-d74f-4b3d-a41c-cf096e0b2508")
+set(CMAKE_CXX_MODULE_STD 1)
+
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+list(APPEND VCPKG_FEATURE_FLAGS "versions")
 
 project(
   gap
@@ -66,6 +73,8 @@ endif ()
 # GAP build settings
 #
 add_library(gap-settings INTERFACE)
+target_compile_features(gap-settings INTERFACE cxx_std_26)
+set_target_properties(gap-settings PROPERTIES CXX_EXTENSIONS OFF)
 add_library(gap::gap-settings ALIAS gap-settings)
 
 option(GAP_ENABLE_WARNINGS "Enable extended warnings" ON)

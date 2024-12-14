@@ -1,81 +1,123 @@
 {
-  "version": 3,
+  "version": 6,
   "cmakeMinimumRequired": {
     "major": 3,
-    "minor": 22,
+    "minor": 30,
     "patch": 0
   },
   "configurePresets": [
     {
-      "name": "with-doctest",
-      "hidden": true,
-      "description": "Use doctest package",
-      "cacheVariables": {
-        "VCPKG_MANIFEST_FEATURES": "with-doctest"
-      }
-    },
-    {
-      "name": "ninja-multi-vcpkg",
-      "displayName": "Ninja Multi-Config Configure Settings",
-      "description": "Configure with vcpkg toolchain",
+      "name": "default",
+      "displayName": "Default",
       "binaryDir": "${sourceDir}/builds/${presetName}",
       "generator": "Ninja Multi-Config",
+      "warnings": {
+        "dev": true,
+        "deprecated": true,
+        "uninitialized": true,
+        "unusedCli": true,
+        "systemVars": false
+      },
+      "errors": {
+        "dev": false,
+        "deprecated": true
+      },
       "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
-      "installDir": "~/opt/gap",
       "cacheVariables": {
-        "CMAKE_CONFIGURATION_TYPES": "Release;RelWithDebInfo;Debug"
+        "CMAKE_CONFIGURATION_TYPES": "Release;RelWithDebInfo;Debug",
+        "CMAKE_PREFIX_PATH": "$env{CMAKE_PREFIX_PATH}",
+        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/cmake/lld.toolchain.cmake",
+        "CMAKE_CXX_FLAGS": "-stdlib=libc++",
+        "VCPKG_OVERLAY_TRIPLETS": "${sourceDir}/vcpkg/triplets",
+        "VCPKG_TARGET_TRIPLET": "arm64-osx-libcxx",
+        "VCPKG_MANIFEST_FEATURES": "with-doctest"
+      },
+      "environment": {
+        "VCPKG_FORCE_SYSTEM_BINARIES=1": "1"
       }
-    },
-    {
-      "name": "ninja-multi-vcpkg-doctest",
-      "displayName": "Ninja Multi-Config Configure Settings with doctest",
-      "inherits": [ "ninja-multi-vcpkg", "with-doctest" ]
     }
   ],
-
   "buildPresets": [
     {
-      "name": "ninja-vcpkg-deb",
-      "configurePreset": "ninja-multi-vcpkg",
-      "displayName": "Build ninja-multi-vcpkg-debug",
+      "name": "default",
+      "hidden": true,
+      "configurePreset": "default"
+    },
+    {
+      "name": "debug",
+      "configurePreset": "default",
+      "displayName": "Debug",
       "configuration": "Debug"
     },
     {
-      "name": "ninja-vcpkg-rel",
-      "configurePreset": "ninja-multi-vcpkg",
-      "displayName": "Build ninja-multi-vcpkg-release",
+      "name": "release",
+      "configurePreset": "default",
+      "displayName": "Release",
       "configuration": "Release"
     },
     {
-      "name": "ninja-vcpkg-deb-doctest",
-      "configurePreset": "ninja-multi-vcpkg-doctest",
-      "displayName": "Build ninja-multi-vcpkg-debug-doctest",
-      "configuration": "Debug"
-    },
-    {
-      "name": "ninja-vcpkg-rel-doctest",
-      "configurePreset": "ninja-multi-vcpkg-doctest",
-      "displayName": "Build ninja-multi-vcpkg-release-doctest",
-      "configuration": "Release"
+      "name": "relwithdebinfo",
+      "configurePreset": "default",
+      "displayName": "RelWithDebInfo",
+      "configuration": "RelWithDebInfo"
     }
   ],
 
   "testPresets": [
     {
-      "name": "ninja-vcpkg-deb",
-      "configurePreset": "ninja-multi-vcpkg",
+      "name": "test-base",
+      "hidden": true,
       "output": {
-        "verbosity": "verbose"
+        "outputOnFailure": true,
+        "verbosity": "default"
       },
+      "execution": {
+        "noTestsAction": "error",
+        "stopOnFailure": false
+      }
+    },
+    {
+      "name": "default",
+      "configurePreset": "default",
+      "hidden": true,
+      "inherits": "test-base"
+    },
+    {
+      "name": "release",
+      "configurePreset": "default",
+      "inherits": "default",
+      "configuration": "Release"
+    },
+    {
+      "name": "debug",
+      "configurePreset": "default",
+      "inherits": "default",
       "configuration": "Debug"
     },
     {
-      "name": "ninja-vcpkg-deb-doctest",
-      "configurePreset": "ninja-multi-vcpkg-doctest",
-      "output": {
-        "verbosity": "verbose"
-      },
-      "configuration": "Debug"
+      "name": "relwithdebinfo",
+      "configurePreset": "default",
+      "inherits": "default",
+      "configuration": "RelWithDebInfo"
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "debug",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "default"
+        },
+        {
+          "type": "build",
+          "name": "debug"
+        },
+        {
+          "type": "test",
+          "name": "debug"
+        }
+      ]
     }
   ]
 }

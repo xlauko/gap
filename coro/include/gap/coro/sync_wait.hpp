@@ -18,6 +18,8 @@
     #include <gap/coro/manual_reset_event.hpp>
 
     #include <cassert>
+    #include <coroutine>
+    #include <exception>
     #include <semaphore>
     #include <utility>
 
